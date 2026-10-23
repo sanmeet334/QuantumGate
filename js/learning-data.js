@@ -7,7 +7,7 @@ const LEARNING_MODULES = [
   {
     id: 'mod1',
     number: '01',
-    title: 'Classical vs Quantum Computing',
+    title: 'Introduction to Quantum Computing',
     icon: '⚡',
     duration: '6 min read',
     topicTag: 'Quantum Fundamentals',
@@ -66,7 +66,7 @@ const LEARNING_MODULES = [
   {
     id: 'mod2',
     number: '02',
-    title: 'What is a Qubit? (Bit vs Qubit)',
+    title: 'Classical Bit vs Qubit',
     icon: '⚛️',
     duration: '8 min read',
     topicTag: 'Superposition',
@@ -331,6 +331,56 @@ const LEARNING_MODULES = [
       ],
       correctIndex: 0,
       explanation: "Because the two qubits are maximally entangled in (|00⟩ + |11⟩)/√2, measuring Qubit 0 as 1 instantly leaves the system in state |11⟩, ensuring Qubit 1 is also 1."
+    }
+  },
+  {
+    id: 'mod8',
+    number: '08',
+    title: 'Beginner Quantum Algorithms',
+    icon: '🚀',
+    duration: '10 min read',
+    topicTag: 'Quantum Fundamentals',
+    summary: 'Discover how quantum parallelism, phase kickback, and constructive interference create speedups in Deutsch-Jozsa and Grover search.',
+    contentHtml: `
+      <div class="lesson-block">
+        <h3>1. The Power of Quantum Parallelism</h3>
+        <p>In classical computing, to evaluate a function <code>f(x)</code> for multiple inputs, a computer must evaluate each input one by one. In quantum computing, putting an N-qubit register into superposition allows the quantum oracle to evaluate all 2<sup>N</sup> inputs simultaneously in a single computational step!</p>
+        <div class="formula-banner">
+          |ψ⟩ = (1 / √2<sup>N</sup>) ∑ |x⟩
+        </div>
+      </div>
+
+      <div class="lesson-block">
+        <h3>2. The Deutsch-Jozsa Algorithm</h3>
+        <p>The Deutsch-Jozsa algorithm provided the earliest mathematical proof of exponential quantum speedup over classical computing:</p>
+        <ul>
+          <li><strong>The Problem:</strong> Determine whether a hidden function is <em>constant</em> (same output for all inputs) or <em>balanced</em> (outputs 0 for half the inputs, 1 for the other half).</li>
+          <li><strong>Classical Approach:</strong> Requires up to 2<sup>N-1</sup> + 1 queries in the worst case to be certain.</li>
+          <li><strong>Quantum Advantage:</strong> Using quantum superposition and phase kickback, the algorithm solves the problem in <strong>strictly 1 single quantum query</strong>!</li>
+        </ul>
+      </div>
+
+      <div class="lesson-block">
+        <h3>3. Grover's Search Algorithm</h3>
+        <p>Searching an unsorted database of N items requires scanning an average of N/2 items classically. Lov Grover's algorithm uses <strong>amplitude amplification</strong> (constructive interference) to pinpoint the desired target state in only ~√N operations—achieving a quadratic quantum speedup!</p>
+        <div class="key-takeaway-box">
+          <div class="takeaway-icon">💡</div>
+          <div>
+            <strong>Key Insight:</strong> Quantum algorithms don't just compute faster clock speeds—they orchestrate wave interference so wrong answers destructively cancel out while the correct answer's probability amplitude amplifies to near 100%!
+          </div>
+        </div>
+      </div>
+    `,
+    checkpoint: {
+      question: "How many queries does the Deutsch-Jozsa algorithm need on a quantum computer to distinguish whether a function is constant or balanced?",
+      options: [
+        "Exactly 1 single quantum query",
+        "2^(N-1) + 1 queries",
+        "N^2 queries",
+        "Zero queries"
+      ],
+      correctIndex: 0,
+      explanation: "Through quantum superposition and constructive interference, the Deutsch-Jozsa algorithm determines with 100% certainty if a function is constant or balanced in just 1 single evaluation."
     }
   }
 ];

@@ -453,6 +453,15 @@
           <div style="margin-top:1.25rem; font-size:0.9rem; color:var(--text-muted);">
             <strong style="color:var(--purple);">Bloch Sphere Effect:</strong> ${gate.blochEffect}
           </div>
+
+          <div style="margin-top:1.75rem; display:flex; gap:0.75rem; flex-wrap:wrap;">
+            <button class="btn btn-primary btn-sm" onclick="window.App.tryGateInLab('${gate.id}')" title="Place this gate into the Quantum Lab simulator">
+              🔬 Try in Quantum Lab ➔
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="window.App.switchView('learn')" title="Read theoretical module in Academy">
+              📖 Read in Academy
+            </button>
+          </div>
         `;
       }
 
@@ -611,12 +620,70 @@
        ------------------------------------------------------------------------ */
     initCircuitLab() {
       this.renderCircuitCanvas();
+      this.setupPaletteDragAndDrop();
       this.updateInspectorWithGate({
         type: 'H',
         id: 'H',
         role: 'single',
         explanation: 'Hadamard gate transforms basis state |0⟩ into equal superposition (|0⟩ + |1⟩)/√2.'
       });
+    }
+
+    setupPaletteDragAndDrop() {
+      const tokens = document.querySelectorAll('.gate-token');
+      tokens.forEach(token => {
+        token.setAttribute('draggable', 'true');
+        token.ondragstart = (e) => {
+          const gateType = token.dataset.gate;
+          if (e.dataTransfer) {
+            e.dataTransfer.setData('text/plain', gateType);
+            e.dataTransfer.effectAllowed = 'copy';
+          }
+          this.selectedPaletteGate = gateType;
+          token.classList.add('selected-for-placement');
+        };
+        token.ondragend = () => {
+          token.classList.remove('selected-for-placement');
+        };
+      });
+    }
+
+    handleSlotDrop(colIdx, qubitIdx, e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const gateType = (e && e.dataTransfer && e.dataTransfer.getData('text/plain')) || this.selectedPaletteGate;
+      if (!gateType) return;
+      this.selectedPaletteGate = gateType;
+      this.handleSlotClick(colIdx, qubitIdx);
+    }
+
+    tryGateInLab(gateId) {
+      this.numQubits = (gateId === 'CNOT' || gateId === 'SWAP') ? 2 : 2;
+      this.circuitGrid = this.createEmptyCircuitGrid(this.numQubits, this.numCols);
+      this.initialQubits = [0, 0, 0, 0];
+
+      if (gateId === 'CNOT') {
+        this.circuitGrid[0][0] = { type: 'H', id: 'H' };
+        this.circuitGrid[1][0] = { type: 'CNOT', role: 'control', target: 1 };
+        this.circuitGrid[1][1] = { type: 'CNOT', role: 'target', control: 0 };
+        this.circuitGrid[2][0] = { type: 'MEASURE', id: 'MEASURE' };
+        this.circuitGrid[2][1] = { type: 'MEASURE', id: 'MEASURE' };
+      } else if (gateId === 'SWAP') {
+        this.circuitGrid[0][0] = { type: 'X', id: 'X' };
+        this.circuitGrid[1][0] = { type: 'SWAP', target: 1 };
+        this.circuitGrid[1][1] = { type: 'SWAP', target: 0 };
+      } else {
+        this.circuitGrid[0][0] = { type: gateId, id: gateId };
+        this.circuitGrid[1][0] = { type: 'MEASURE', id: 'MEASURE' };
+      }
+
+      this.switchView('lab');
+      this.renderCircuitCanvas();
+      this.runCircuit(true);
+      this.updateInspectorWithGate(this.circuitGrid[0][0] || this.circuitGrid[1][0], 0);
+      this.showToast(`Loaded ${gateId} Gate into Quantum Lab! Run and experiment with it.`, 'success');
     }
 
     createEmptyCircuitGrid(numQubits, numCols) {
@@ -829,7 +896,7 @@
           }
 
           html += `
-            <div class="circuit-slot ${slotClass}" onclick="window.App.handleSlotClick(${c}, ${q})">
+            <div class="circuit-slot ${slotClass}" onclick="window.App.handleSlotClick(${c}, ${q})" ondragover="event.preventDefault(); event.dataTransfer.dropEffect = 'copy';" ondrop="window.App.handleSlotDrop(${c}, ${q}, event)">
               ${gateContent}
             </div>
           `;
@@ -1082,8 +1149,9 @@
       const elBest = document.getElementById('analyticsBestScore');
       const elBestSub = document.getElementById('analyticsBestScoreSub');
 
+      const totalMods = (window.LEARNING_MODULES && window.LEARNING_MODULES.length) || 8;
       if (elProgress) elProgress.textContent = `${overallProgress}%`;
-      if (elMods) elMods.textContent = `${this.completedModules.length} / 7`;
+      if (elMods) elMods.textContent = `${this.completedModules.length} / ${totalMods}`;
       if (elGates) elGates.textContent = `${this.studiedGates.length} / 8`;
       if (elCircuits) elCircuits.textContent = this.circuitsExecutedCount.toString();
 
@@ -1212,8 +1280,8 @@
        OVERALL PROGRESS CALCULATOR (PRD Section 3)
        ------------------------------------------------------------------------ */
     calculateOverallProgress() {
-      // 7 modules = 40%, 8 gates = 25%, lab runs = 15%, assessment = 20%
-      const modRatio = this.completedModules.length / 7;
+      const totalMods = (window.LEARNING_MODULES && window.LEARNING_MODULES.length) || 8;
+      const modRatio = this.completedModules.length / totalMods;
       const gateRatio = this.studiedGates.length / 8;
       const labRatio = Math.min(1, (this.circuitsExecutedCount + this.labExperimentsCount) / 10);
       
@@ -1229,6 +1297,7 @@
 
     updateOverallProgress() {
       const progress = this.calculateOverallProgress();
+      const totalMods = (window.LEARNING_MODULES && window.LEARNING_MODULES.length) || 8;
 
       // Header chip
       const elHeaderBadge = document.getElementById('headerProgressBadge');
@@ -1244,7 +1313,7 @@
 
       if (elDashVal) elDashVal.textContent = `${progress}%`;
       if (elDashBar) elDashBar.style.width = `${progress}%`;
-      if (elMetricMods) elMetricMods.textContent = `${this.completedModules.length}/7`;
+      if (elMetricMods) elMetricMods.textContent = `${this.completedModules.length}/${totalMods}`;
       if (elMetricGates) elMetricGates.textContent = `${this.studiedGates.length}/8`;
       if (elMetricRuns) elMetricRuns.textContent = (this.circuitsExecutedCount + this.labExperimentsCount).toString();
 
@@ -1258,7 +1327,7 @@
       // Card stats
       const elCardMods = document.getElementById('cardStatModules');
       const elCardGates = document.getElementById('cardStatGates');
-      if (elCardMods) elCardMods.textContent = `${this.completedModules.length}/7 Completed`;
+      if (elCardMods) elCardMods.textContent = `${this.completedModules.length}/${totalMods} Completed`;
       if (elCardGates) elCardGates.textContent = `${this.studiedGates.length}/8 Studied`;
     }
 
@@ -1562,21 +1631,21 @@
         const isCorrect = userChoice === q.correctIndex;
 
         return `
-          <div style="background:rgba(7,11,22,0.6); border:1px solid ${isCorrect ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}; border-radius:var(--radius-md); padding:1.25rem;">
+          <div style="background:#ffffff; border:1px solid ${isCorrect ? '#a7f3d0' : '#fecaca'}; border-radius:var(--radius-md); padding:1.25rem; box-shadow:var(--shadow-xs);">
             <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
               <span style="font-weight:700; color:var(--text-dim); font-size:0.85rem;">Question ${i + 1} (${q.topic})</span>
-              <span style="font-weight:700; font-size:0.85rem; color:${isCorrect ? 'var(--emerald)' : '#ef4444'};">
+              <span style="font-weight:700; font-size:0.85rem; color:${isCorrect ? 'var(--emerald)' : '#dc2626'};">
                 ${isCorrect ? '✓ Correct' : '✕ Incorrect'}
               </span>
             </div>
             <p style="font-size:1rem; font-weight:600; color:var(--text-bright); margin-bottom:0.85rem;">${q.question}</p>
             
-            <div style="font-size:0.9rem; margin-bottom:0.5rem;">
-              <div>Your Answer: <strong style="color:${isCorrect ? 'var(--emerald)' : '#f87171'};">${userChoice !== undefined ? `${letters[userChoice]}. ${q.options[userChoice]}` : 'Unanswered'}</strong></div>
-              ${!isCorrect ? `<div>Correct Answer: <strong style="color:var(--emerald);">${letters[q.correctIndex]}. ${q.options[q.correctIndex]}</strong></div>` : ''}
+            <div style="font-size:0.92rem; margin-bottom:0.75rem;">
+              <div>Your Answer: <strong style="color:${isCorrect ? 'var(--emerald)' : '#dc2626'};">${userChoice !== undefined ? `${letters[userChoice]}. ${q.options[userChoice]}` : 'Unanswered'}</strong></div>
+              ${!isCorrect ? `<div style="margin-top:0.25rem;">Correct Answer: <strong style="color:var(--emerald);">${letters[q.correctIndex]}. ${q.options[q.correctIndex]}</strong></div>` : ''}
             </div>
 
-            <div style="font-size:0.85rem; color:var(--text-muted); background:rgba(255,255,255,0.03); padding:0.6rem 0.85rem; border-radius:var(--radius-sm);">
+            <div style="font-size:0.88rem; color:var(--text-muted); background:#f8fafc; border:1px solid #e2e8f0; padding:0.75rem 1rem; border-radius:var(--radius-sm);">
               <strong>Explanation:</strong> ${q.explanation}
             </div>
           </div>

@@ -116,7 +116,7 @@
             <div class="progress-bar-fill" id="dashboardProgressBar" style="width: 0%;"></div>
           </div>
           <div class="progress-submetrics">
-            <div class="progress-submetric">Modules: <span id="dashMetricModules">0/7</span></div>
+            <div class="progress-submetric">Modules: <span id="dashMetricModules">0/8</span></div>
             <div class="progress-submetric">Gates Studied: <span id="dashMetricGates">0/8</span></div>
             <div class="progress-submetric">Lab Runs: <span id="dashMetricRuns">0</span></div>
             <div class="progress-submetric">Assessment: <span id="dashMetricScore">Not Taken</span></div>
@@ -148,7 +148,7 @@
           <div>
             <div class="dash-card-top">
               <div class="dash-icon-box dash-icon-cyan">📖</div>
-              <span class="dash-stat-badge" id="cardStatModules">0/7 Completed</span>
+              <span class="dash-stat-badge" id="cardStatModules">0/8 Completed</span>
             </div>
             <h3>Learn Quantum Computing</h3>
             <p>Master the fundamentals step-by-step: bits vs qubits, superposition, Bloch sphere, measurement collapse, and quantum entanglement.</p>
@@ -415,7 +415,7 @@
             <!-- Populated dynamically with counts and percentages -->
           </div>
 
-          <div class="key-takeaway-box" style="margin-top:1.5rem; background:rgba(0, 240, 255, 0.05); border-color:rgba(0, 240, 255, 0.2);">
+          <div class="key-takeaway-box" style="margin-top:1.5rem;">
             <div class="takeaway-icon">💡</div>
             <div style="font-size:0.88rem; color:var(--text-muted);">
               <strong>Why counts fluctuate:</strong> Quantum measurement is fundamentally projective and probabilistic. Over a large number of shots (Law of Large Numbers), empirical frequencies converge toward the exact quantum amplitudes.
@@ -438,7 +438,7 @@
         </div>
         <div class="metric-card">
           <div class="label">Modules Completed</div>
-          <div class="value" id="analyticsModulesCount">0 / 7</div>
+          <div class="value" id="analyticsModulesCount">0 / 8</div>
           <div class="sub">Learning Academy</div>
         </div>
         <div class="metric-card">
@@ -629,7 +629,7 @@
        QUESTION REVIEW MODAL
        ========================================================================= -->
   <div id="reviewModal" class="modal-overlay">
-    <div class="glass-card" style="max-width:850px; width:100%; max-height:85vh; overflow-y:auto; padding:2rem; background:var(--bg-surface-elevated);">
+    <div class="glass-card" style="max-width:850px; width:100%; max-height:85vh; overflow-y:auto; padding:2rem; background:#ffffff; border-radius:var(--radius-xl); box-shadow:var(--shadow-xl);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; border-bottom:1px solid var(--border-subtle); padding-bottom:1rem;">
         <h3 style="font-size:1.4rem;">Assessment Detailed Review</h3>
         <button class="btn-icon-subtle" style="font-size:1.5rem;" onclick="document.getElementById('reviewModal').classList.remove('active');">✕</button>
